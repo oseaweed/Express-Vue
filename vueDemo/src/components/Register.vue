@@ -44,11 +44,11 @@
             if (res.data.state) {
               self.$toast('注册成功');
             } else {
-              self.$toast(res.data.msg);
+              self.$toast(res.message);
             }
           }).catch(function (err) {
           if (err) {
-            self.$toast(err.data.msg);
+            self.$toast(err.message);
           }
         });
       }

@@ -4,6 +4,7 @@ var mysql = require('mysql');
 var db = require('../config/db');
 var operate = require('../config/operate');
 var connection = mysql.createConnection(db.pool);
+var crypto = require('crypto');
 connection.connect();
 // 解决跨域请求
 router.all('*', function (req, res, next) {
@@ -16,24 +17,32 @@ router.all('*', function (req, res, next) {
 });
 // 注册
 router.post('/register', function (req, res) {
-  const params = req.body;
-  if (!req.body.account) {
+  const {
+    account,
+    password
+  } = req.body;
+  // 哈希加密
+  const hash = crypto.createHash('md5');
+  const endPaW = hash.update(password).digest("hex");
+  console.log(111, endPaW)
+  if (!account) {
     res.send({
       msg: '用户名不能为空',
       state: false
     })
     return;
   }
-  if (!req.body.password) {
+  if (!password) {
     res.send({
       msg: '密码不能为空',
       state: false
     })
     return;
   }
-  connection.query(operate.accountFindAccount, req.body.account, function (err, result) {
+
+  connection.query(operate.accountFindAccount, account, function (err, result) {
     if (err) throw err;
-    if (result.length !== 0) {
+    if (result.length > 0) {
       res.send({
         state: false,
         msg: '该账号已经被注册'
@@ -41,7 +50,7 @@ router.post('/register', function (req, res) {
       return;
     }
     if (result.length === 0) {
-      var userInfo = ['', params.account, params.password];
+      var userInfo = ['', account, password,''];
       connection.query(operate.accountAddSql, userInfo, (err, result) => {
         if (err) throw err;
         else {
